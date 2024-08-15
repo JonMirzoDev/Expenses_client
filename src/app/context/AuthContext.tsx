@@ -8,6 +8,7 @@ import {
   useEffect,
   useState
 } from 'react'
+import { logoutUser } from '../lib/api'
 
 interface AuthContextType {
   user: { username: string; email: string } | null
@@ -29,10 +30,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/')
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
-    router.push('/login')
+  const logout = async () => {
+    try {
+      await logoutUser()
+      setUser(null)
+      localStorage.removeItem('user')
+      router.push('/login')
+    } catch (error) {
+      console.error('Failed to log out:', error)
+    }
   }
 
   useEffect(() => {

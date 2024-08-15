@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { loginUser } from '../lib/api'
 
 export default function LoginPage() {
@@ -9,11 +10,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
+  const { login } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       const data = await loginUser(email, password)
+      login(data?.user)
       console.log('Login successfull:', data)
       router.push('/')
     } catch (error) {

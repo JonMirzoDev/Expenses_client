@@ -11,8 +11,16 @@ export const api = axios.create({
 
 // login request
 export const loginUser = async (email: string, password: string) => {
-  const response = await api.post('/login', { email, password })
-  return response.data
+  try {
+    const response = await api.post(
+      '/login',
+      { email, password },
+      { withCredentials: true }
+    )
+    return response.data
+  } catch (error) {
+    throw error
+  }
 }
 
 // registration request
@@ -23,4 +31,13 @@ export const registerUser = async (
 ) => {
   const response = await api.post('/register', { username, email, password })
   return response.data
+}
+
+// logout user on the server
+export const logoutUser = async () => {
+  try {
+    await api.post('/logout', { withCredentials: true })
+  } catch (error) {
+    throw error
+  }
 }
