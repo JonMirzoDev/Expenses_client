@@ -14,6 +14,7 @@ interface AuthContextType {
   user: { username: string; email: string } | null
   login: (userData: { username: string; email: string }) => void
   logout: () => void
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{ username: string; email: string } | null>(
     null
   )
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   const login = (userData: { username: string; email: string }) => {
@@ -46,10 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUser) {
       setUser(JSON.parse(storedUser))
     }
+    setLoading(false)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )
