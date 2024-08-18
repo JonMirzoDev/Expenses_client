@@ -2,13 +2,25 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 
 const API_BASE_URL = 'http://localhost:5000'
 
+// Function to retrieve CSRF token from cookies
+function getCsrfToken() {
+  const match = document.cookie.match(
+    new RegExp('(^| )csrf_access_token=([^;]+)')
+  )
+  return match ? match[2] : ''
+}
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'X-CSRF-Token': getCsrfToken()
+    'Content-Type': 'application/json'
   },
-  withCredentials: true // Ensure cookies are sent with requests
+  withCredentials: true
+})
+
+api.interceptors.request.use((config) => {
+  config.headers['X-CSRF-Token'] = getCsrfToken()
+  return config
 })
 
 api.interceptors.response.use(
@@ -33,14 +45,6 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
-// Function to retrieve CSRF token from cookies
-function getCsrfToken() {
-  const match = document.cookie.match(
-    new RegExp('(^| )csrf_access_token=([^;]+)')
-  )
-  return match ? match[2] : ''
-}
 
 // login request
 export const loginUser = async (email: string, password: string) => {
