@@ -93,12 +93,12 @@ export default function CategoriesList() {
                 <td className='py-2 px-4 border-b'>{category.id}</td>
                 <td className='py-2 px-4 border-b'>{category.name}</td>
                 <td className='py-2 px-4 border-b'>
-                  <button
+                  {/* <button
                     onClick={() => openUpdateModal(category)}
                     className='py-1 px-3 bg-blue-600 text-white rounded-md hover:bg-blue-700'
                   >
                     Update
-                  </button>
+                  </button> */}
                   <button
                     onClick={() => openDeleteModal(category)}
                     className='ml-2 py-1 px-3 bg-red-600 text-white rounded-md hover:bg-red-700'
@@ -117,7 +117,7 @@ export default function CategoriesList() {
           isOpen={isModalOpen}
           onClose={closeModal}
           onUpdateCategory={handleUpdateCategory}
-          onUpdateExpense={() => {}} // Not used in CategoriesList
+          onUpdateExpense={() => {}}
           onDelete={handleDelete}
           item={selectedCategory}
           isDeleteMode={isDeleteMode}
