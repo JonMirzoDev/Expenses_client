@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
+import { getRefreshToken, validateRefreshToken } from './utils'
 
 const API_BASE_URL = 'http://localhost:5000'
 
@@ -33,12 +34,57 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       try {
-        await axios.post(`${API_BASE_URL}/refresh`, null, {
-          withCredentials: true
-        })
+        console.log('Attempting token refresh...')
 
-        return api(originalRequest)
+        const refreshToken = getRefreshToken()
+
+        if (validateRefreshToken(refreshToken)) {
+          // Retrieve the CSRF token
+          const csrfToken = getCsrfToken()
+
+          const refreshResponse = await axios.post(
+            `${API_BASE_URL}/refresh`,
+            null,
+            {
+              withCredentials: true,
+              headers: {
+                'X-CSRF-Token': csrfToken
+              }
+            }
+          )
+
+          console.log('Refresh response:', refreshResponse.data)
+          return api(originalRequest)
+        } else {
+          console.error('Refresh token is invalid or expired')
+
+          // Logout user and redirect to login page
+          try {
+            await logoutUser()
+          } catch (logoutError) {
+            console.error('Logout failed:', logoutError)
+          }
+
+          if (typeof window !== 'undefined') {
+            window.location.href = '/'
+          }
+
+          return Promise.reject('Refresh token is invalid or expired')
+        }
       } catch (refreshError) {
+        console.error('Refresh token failed:', refreshError)
+
+        // Logout user and redirect to login page
+        try {
+          await logoutUser()
+        } catch (logoutError) {
+          console.error('Logout failed:', logoutError)
+        }
+
+        if (typeof window !== 'undefined') {
+          window.location.href = '/'
+        }
+
         return Promise.reject(refreshError)
       }
     }

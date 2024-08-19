@@ -24,7 +24,7 @@ export default function ExpenseItem({
   }
 
   return (
-    <div className='flex items-center p-4 mb-2 bg-white border border-gray-200 rounded-lg shadow-sm'>
+    <div className='flex flex-col p-4 mb-2 bg-white border border-gray-200 rounded-lg shadow-sm'>
       <div className='flex-1'>
         <p className='text-lg font-medium text-gray-800'>
           {expense.description}
@@ -35,10 +35,10 @@ export default function ExpenseItem({
           Category ID: {expense.category_id}
         </p>
       </div>
-      <div className='ml-4 flex-shrink-0'>
+      <div className='mt-4 flex justify-end space-x-2'>
         <button
           onClick={handleUpdate}
-          className='mr-2 py-1 px-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+          className='py-1 px-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
         >
           Update
         </button>
