@@ -1,6 +1,12 @@
 'use client'
 
-import { Expense } from './ExpensesList'
+export interface Expense {
+  id: number
+  description: string
+  amount: number
+  date: string
+  category_id: number
+}
 
 interface ExpenseItemProps {
   expense: Expense
@@ -13,8 +19,6 @@ export default function ExpenseItem({
   onUpdate,
   onDelete
 }: ExpenseItemProps) {
-  console.log('expense: ', expense)
-
   const handleUpdate = () => {
     onUpdate(expense)
   }

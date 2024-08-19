@@ -1,36 +1,33 @@
 'use client'
 
 import { api } from '@/app/lib/api'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Modal from '../Modal'
-import ExpenseItem from './ExpenseItem'
+import ExpenseItem, { Expense } from './ExpenseItem'
 
-export interface Expense {
-  id: number
-  amount: number
-  description: string
-  date: string
-  category_id: number
-  user_id: number
-}
-
-interface ExpensesListProps {
-  expenses: Expense[] | null
-  onAddExpense: () => void
-}
-
-export default function ExpensesList({
-  expenses,
-  onAddExpense
-}: ExpensesListProps) {
+export default function ExpensesList() {
+  const [expenses, setExpenses] = useState<Expense[]>([])
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteMode, setIsDeleteMode] = useState(false)
 
-  const handleUpdate = async (updatedExpense: Expense) => {
+  useEffect(() => {
+    async function fetchExpenses() {
+      const response = await api.get('/expenses')
+      setExpenses(response.data)
+    }
+
+    fetchExpenses()
+  }, [])
+
+  const handleUpdateExpense = async (updatedExpense: Expense) => {
     try {
       await api.put(`/expenses/${updatedExpense.id}`, updatedExpense)
-      onAddExpense()
+      setExpenses(
+        expenses.map((expense) =>
+          expense.id === updatedExpense.id ? updatedExpense : expense
+        )
+      )
       closeModal()
     } catch (error) {
       console.error('Error updating expense:', error)
@@ -40,7 +37,7 @@ export default function ExpensesList({
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/expenses/${id}`)
-      onAddExpense()
+      setExpenses(expenses.filter((expense) => expense.id !== id))
       closeModal()
     } catch (error) {
       console.error('Error deleting expense:', error)
@@ -65,9 +62,9 @@ export default function ExpensesList({
   }
 
   return (
-    <>
-      <div className='mt-6 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
-        {expenses?.map((expense) => (
+    <div className='p-6'>
+      <div className='max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg'>
+        {expenses.map((expense) => (
           <ExpenseItem
             key={expense.id}
             expense={expense}
@@ -76,16 +73,18 @@ export default function ExpensesList({
           />
         ))}
       </div>
-      {isModalOpen && selectedExpense && (
+
+      {selectedExpense && (
         <Modal
           isOpen={isModalOpen}
           onClose={closeModal}
-          onUpdate={handleUpdate}
+          onUpdateCategory={() => {}} // Not used in ExpensesList
+          onUpdateExpense={handleUpdateExpense}
           onDelete={handleDelete}
-          expense={selectedExpense}
+          item={selectedExpense}
           isDeleteMode={isDeleteMode}
         />
       )}
-    </>
+    </div>
   )
 }

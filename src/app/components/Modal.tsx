@@ -1,35 +1,39 @@
 'use client'
 
 import { useState } from 'react'
-import { Expense } from './Expense/ExpensesList'
+import { Category } from './Category/CategoriesList'
+import { Expense } from './Expense/ExpenseItem'
+
+type Item = Expense | Category
 
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  onUpdate: (updatedExpense: Expense) => void
+  onUpdateCategory: (updatedCategory: Category) => void
+  onUpdateExpense: (updatedExpense: Expense) => void
   onDelete: (id: number) => void
-  expense: Expense
+  item: Item
   isDeleteMode: boolean
 }
 
 export default function Modal({
   isOpen,
   onClose,
-  onUpdate,
+  onUpdateCategory,
+  onUpdateExpense,
   onDelete,
-  expense,
+  item,
   isDeleteMode
 }: ModalProps) {
   const [formData, setFormData] = useState({
-    amount: expense.amount,
-    description: expense.description,
-    date: expense.date,
-    category_id: expense.category_id
+    description: 'description' in item ? item.description : '',
+    amount: 'amount' in item ? item.amount : 0,
+    date: 'date' in item ? item.date : '',
+    category_id: 'category_id' in item ? item.category_id : 0,
+    name: 'name' in item ? item.name : ''
   })
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -37,18 +41,24 @@ export default function Modal({
   }
 
   const handleUpdate = () => {
-    onUpdate({ ...expense, ...formData })
+    if ('description' in item) {
+      // It's an Expense
+      onUpdateExpense({ ...item, ...formData } as Expense)
+    } else {
+      // It's a Category
+      onUpdateCategory({ ...item, ...formData } as Category)
+    }
   }
 
   const handleDelete = () => {
-    onDelete(expense.id)
+    onDelete(item.id)
   }
 
   return (
     <>
       {isOpen && (
         <div className='fixed inset-0 flex items-center justify-center p-4 bg-gray-800 bg-opacity-50'>
-          <div className='bg-white p-6 rounded-lg shadow-lg max-w-sm w-full'>
+          <div className='bg-white p-6 rounded-lg shadow-lg max-w-sm w-full relative'>
             <button
               onClick={onClose}
               className='absolute top-2 right-2 text-gray-500 hover:text-gray-700'
@@ -78,60 +88,76 @@ export default function Modal({
                   handleUpdate()
                 }}
               >
-                <div>
-                  <label className='block text-sm font-medium text-gray-700'>
-                    Amount:
-                  </label>
-                  <input
-                    type='number'
-                    name='amount'
-                    value={formData.amount}
-                    onChange={handleChange}
-                    className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
-                    required
-                  />
-                </div>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700'>
-                    Description:
-                  </label>
-                  <input
-                    type='text'
-                    name='description'
-                    value={formData.description}
-                    onChange={handleChange}
-                    className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
-                    required
-                  />
-                </div>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700'>
-                    Date:
-                  </label>
-                  <input
-                    type='date'
-                    name='date'
-                    value={formData.date}
-                    onChange={handleChange}
-                    className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
-                    required
-                  />
-                </div>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700'>
-                    Category:
-                  </label>
-                  <select
-                    name='category_id'
-                    value={formData.category_id}
-                    onChange={handleChange}
-                    className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
-                    required
-                  >
-                    <option value={1}>Category 1</option>
-                    <option value={2}>Category 2</option>
-                  </select>
-                </div>
+                {'description' in item ? (
+                  <>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700'>
+                        Description:
+                      </label>
+                      <input
+                        type='text'
+                        name='description'
+                        value={formData.description}
+                        onChange={handleChange}
+                        className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700'>
+                        Amount:
+                      </label>
+                      <input
+                        type='number'
+                        name='amount'
+                        value={formData.amount}
+                        onChange={handleChange}
+                        className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700'>
+                        Date:
+                      </label>
+                      <input
+                        type='date'
+                        name='date'
+                        value={formData.date}
+                        onChange={handleChange}
+                        className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700'>
+                        Category ID:
+                      </label>
+                      <input
+                        type='number'
+                        name='category_id'
+                        value={formData.category_id}
+                        onChange={handleChange}
+                        className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
+                        required
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700'>
+                      Name:
+                    </label>
+                    <input
+                      type='text'
+                      name='name'
+                      value={formData.name}
+                      onChange={handleChange}
+                      className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm'
+                      required
+                    />
+                  </div>
+                )}
                 <div className='mt-4 flex justify-between'>
                   <button
                     type='submit'
