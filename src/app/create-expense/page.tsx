@@ -2,7 +2,7 @@
 
 import { api } from '@/app/lib/api'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import withAuth from '../lib/withAuth'
 
 interface CreateExpenseForm {
@@ -10,6 +10,11 @@ interface CreateExpenseForm {
   description: string
   date: string
   category_id: number
+}
+
+interface Category {
+  id: number
+  name: string
 }
 
 function CreateExpense() {
@@ -20,6 +25,20 @@ function CreateExpense() {
     date: '',
     category_id: 1
   })
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await api.get('/categories')
+        setCategories(response.data)
+      } catch (error) {
+        console.error('Failed to fetch categories:', error)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -42,7 +61,7 @@ function CreateExpense() {
         category_id: 1
       })
     } catch (error) {
-      console.error(error)
+      console.error('Error creating expense:', error)
     }
   }
 
@@ -103,8 +122,11 @@ function CreateExpense() {
               required
               className='mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
             >
-              <option value={1}>Category 1</option>
-              <option value={2}>Category 2</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
           <button
