@@ -7,18 +7,32 @@ import ExpenseItem, { Expense } from './ExpenseItem'
 
 export default function ExpensesList() {
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    []
+  )
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteMode, setIsDeleteMode] = useState(false)
 
   useEffect(() => {
+    async function fetchCategories() {
+      const response = await api.get('/categories')
+      setCategories(response.data)
+    }
+
     async function fetchExpenses() {
-      const response = await api.get('/expenses')
+      let url = '/expenses'
+      if (selectedCategory) {
+        url += `?category_id=${selectedCategory}`
+      }
+      const response = await api.get(url)
       setExpenses(response.data)
     }
 
+    fetchCategories()
     fetchExpenses()
-  }, [])
+  }, [selectedCategory])
 
   const handleUpdateExpense = async (updatedExpense: Expense) => {
     try {
@@ -64,6 +78,44 @@ export default function ExpensesList() {
   return (
     <div className='p-6'>
       <div className='max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg'>
+        {/* Category Filter Dropdown */}
+        <div className='mb-6'>
+          <label
+            htmlFor='category'
+            className='block text-lg font-medium text-gray-800 mb-2'
+          >
+            Filter by Category
+          </label>
+          <div className='relative'>
+            <select
+              id='category'
+              name='category'
+              value={selectedCategory || ''}
+              onChange={(e) =>
+                setSelectedCategory(Number(e.target.value) || null)
+              }
+              className='block w-full px-4 py-2 pr-8 leading-tight border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            >
+              <option value=''>All Categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700'>
+              <svg
+                className='fill-current h-4 w-4'
+                xmlns='http://www.w3.org/2000/svg'
+                viewBox='0 0 20 20'
+              >
+                <path d='M7 10l5 5 5-5H7z' />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Expense Items */}
         {expenses.map((expense) => (
           <ExpenseItem
             key={expense.id}
@@ -74,6 +126,7 @@ export default function ExpensesList() {
         ))}
       </div>
 
+      {/* Modal for Updating or Deleting Expenses */}
       {selectedExpense && (
         <Modal
           isOpen={isModalOpen}
