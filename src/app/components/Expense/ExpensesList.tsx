@@ -10,6 +10,7 @@ export default function ExpensesList() {
   const [categories, setCategories] = useState<{ id: number; name: string }[]>(
     []
   )
+
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -125,35 +126,37 @@ export default function ExpensesList() {
         ))}
 
         {/* Pagination Controls */}
-        <div className='mt-6 flex justify-between'>
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-lg shadow-sm text-white ${
-              currentPage === 1
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600'
-            }`}
-          >
-            Previous
-          </button>
+        {expenses.length > 0 && (
+          <div className='mt-6 flex justify-between'>
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg shadow-sm text-white ${
+                currentPage === 1
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+            >
+              Previous
+            </button>
 
-          <span className='text-gray-700'>
-            Page {currentPage} of {totalPages}
-          </span>
+            <span className='text-gray-700'>
+              Page {currentPage} of {totalPages}
+            </span>
 
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-lg shadow-sm text-white ${
-              currentPage === totalPages
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600'
-            }`}
-          >
-            Next
-          </button>
-        </div>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg shadow-sm text-white ${
+                currentPage === totalPages
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal for Updating or Deleting Expenses */}

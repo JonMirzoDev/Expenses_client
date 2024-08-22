@@ -9,7 +9,7 @@ interface CreateExpenseForm {
   amount: number
   description: string
   date: string
-  category_id: number
+  category_id: number | '' // Allow empty string for initial state
 }
 
 interface Category {
@@ -23,7 +23,7 @@ function CreateExpense() {
     amount: 0,
     description: '',
     date: '',
-    category_id: 1
+    category_id: ''
   })
   const [categories, setCategories] = useState<Category[]>([])
 
@@ -31,7 +31,14 @@ function CreateExpense() {
     async function fetchCategories() {
       try {
         const response = await api.get('/categories')
-        setCategories(response.data.categories)
+        const fetchedCategories = response.data.categories
+        setCategories(fetchedCategories)
+        if (fetchedCategories.length > 0) {
+          setFormData((prevData) => ({
+            ...prevData,
+            category_id: fetchedCategories[0].id
+          }))
+        }
       } catch (error) {
         console.error('Failed to fetch categories:', error)
       }
@@ -43,9 +50,11 @@ function CreateExpense() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+    const value =
+      e.target.name === 'category_id' ? Number(e.target.value) : e.target.value
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     })
   }
 
@@ -58,7 +67,7 @@ function CreateExpense() {
         amount: 0,
         description: '',
         date: '',
-        category_id: 1
+        category_id: categories.length > 0 ? categories[0].id : ''
       })
     } catch (error) {
       console.error('Error creating expense:', error)
