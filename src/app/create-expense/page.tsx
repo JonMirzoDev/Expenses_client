@@ -31,7 +31,7 @@ function CreateExpense() {
     async function fetchCategories() {
       try {
         const response = await api.get('/categories')
-        setCategories(response.data)
+        setCategories(response.data.categories)
       } catch (error) {
         console.error('Failed to fetch categories:', error)
       }

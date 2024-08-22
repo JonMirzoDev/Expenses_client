@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import CategoriesList from '../components/Category/CategoriesList'
-import ExpensesList, { Expense } from '../components/Expense/ExpensesList'
+import { Expense } from '../components/Expense/ExpenseItem'
+import ExpensesList from '../components/Expense/ExpensesList'
 import { useAuth } from '../context/AuthContext'
 import { getExpenses } from '../lib/api'
 import withAuth from '../lib/withAuth'
@@ -92,11 +93,7 @@ function DashboardPage() {
             Categories
           </button>
         </div>
-        {view === 'expenses' ? (
-          <ExpensesList expenses={expenses} onAddExpense={handleAddExpense} />
-        ) : (
-          <CategoriesList />
-        )}
+        {view === 'expenses' ? <ExpensesList /> : <CategoriesList />}
       </div>
     </main>
   )

@@ -15,24 +15,29 @@ export default function ExpensesList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteMode, setIsDeleteMode] = useState(false)
 
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalExpenses, setTotalExpenses] = useState(0)
+  const [perPage] = useState(5)
+
   useEffect(() => {
     async function fetchCategories() {
       const response = await api.get('/categories')
-      setCategories(response.data)
+      setCategories(response.data.categories)
     }
 
     async function fetchExpenses() {
-      let url = '/expenses'
+      let url = `/expenses?page=${currentPage}&per_page=${perPage}`
       if (selectedCategory) {
-        url += `?category_id=${selectedCategory}`
+        url += `&category_id=${selectedCategory}`
       }
       const response = await api.get(url)
-      setExpenses(response.data)
+      setExpenses(response.data.expenses)
+      setTotalExpenses(response.data.total)
     }
 
     fetchCategories()
     fetchExpenses()
-  }, [selectedCategory])
+  }, [selectedCategory, currentPage, perPage])
 
   const handleUpdateExpense = async (updatedExpense: Expense) => {
     try {
@@ -75,6 +80,9 @@ export default function ExpensesList() {
     setSelectedExpense(null)
   }
 
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(totalExpenses / perPage)
+
   return (
     <div className='p-6'>
       <div className='max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg'>
@@ -115,6 +123,37 @@ export default function ExpensesList() {
             onDelete={openDeleteModal}
           />
         ))}
+
+        {/* Pagination Controls */}
+        <div className='mt-6 flex justify-between'>
+          <button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg shadow-sm text-white ${
+              currentPage === 1
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 hover:bg-blue-600'
+            }`}
+          >
+            Previous
+          </button>
+
+          <span className='text-gray-700'>
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg shadow-sm text-white ${
+              currentPage === totalPages
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 hover:bg-blue-600'
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Modal for Updating or Deleting Expenses */}

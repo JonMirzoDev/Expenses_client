@@ -16,15 +16,24 @@ export default function CategoriesList() {
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isDeleteMode, setIsDeleteMode] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  const perPage = 5
 
   useEffect(() => {
     async function fetchCategories() {
-      const response = await api.get('/categories')
-      setCategories(response.data)
+      const response = await api.get(
+        `/categories?page=${currentPage}&per_page=${perPage}`,
+        { withCredentials: true }
+      )
+      console.log('response categories: ', response)
+      setCategories(response.data.categories)
+      setTotalPages(Math.ceil(response.data.total / perPage))
     }
 
     fetchCategories()
-  }, [])
+  }, [categories, currentPage])
 
   const handleUpdateCategory = async (updatedCategory: Category) => {
     try {
@@ -65,6 +74,12 @@ export default function CategoriesList() {
   const closeModal = () => {
     setIsModalOpen(false)
     setSelectedCategory(null)
+  }
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage)
+    }
   }
 
   return (
@@ -110,6 +125,35 @@ export default function CategoriesList() {
             ))}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        <div className='flex justify-between items-center mt-4'>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`py-2 px-4 rounded-md ${
+              currentPage === 1
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            Previous
+          </button>
+          <span className='text-gray-600'>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`py-2 px-4 rounded-md ${
+              currentPage === totalPages
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {selectedCategory && (
